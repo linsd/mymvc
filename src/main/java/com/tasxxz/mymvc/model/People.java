@@ -1,5 +1,8 @@
 package com.tasxxz.mymvc.model;
 
+import org.hibernate.validator.constraints.NotBlank;
+
+import javax.validation.constraints.Min;
 import java.util.Date;
 
 /**
@@ -7,8 +10,10 @@ import java.util.Date;
  */
 public class People {
 
+    @NotBlank(message = "name不能为空")
     private String name;
 
+    @Min(value = 17, message = "age不能小于17")
     private int age;
 
     private Date createTime = new Date();
