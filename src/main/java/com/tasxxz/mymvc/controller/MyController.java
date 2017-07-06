@@ -43,9 +43,9 @@ public class MyController {
         return new People(name, age);
     }
 
-    @RequestMapping("/people2")
+    @RequestMapping("/valid")
     @ResponseBody
-    public Map people2(@Valid People people, BindingResult result) {
+    public Map valid(@Valid People people, BindingResult result) {
         if(result.hasErrors()) {
             //如果没有通过,跳转提示
             Map<String, String> map = getErrors(result);
