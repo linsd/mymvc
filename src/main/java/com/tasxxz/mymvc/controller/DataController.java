@@ -1,9 +1,11 @@
 package com.tasxxz.mymvc.controller;
 
 import com.tasxxz.mymvc.util.DataUtil;
+import com.tasxxz.mymvc.ws.MSGWebsocket;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -40,5 +42,44 @@ public class DataController {
         }
         model.put("message", remark + "[" + path + "]");
         return "message";
+    }
+
+    @RequestMapping("/send/ws/msg")
+    @ResponseBody
+    public String sendWebSocketMsg(@RequestParam("sn") String sn,
+                                   @RequestParam(value = "msg", defaultValue = "hello") String msg,
+                                   @RequestParam(value = "times", defaultValue = "3") Integer times) {
+        System.out.println("sn:" + sn + ",msg:" + msg + ",times:" + times);
+        for (MSGWebsocket msgWebsocket : MSGWebsocket.webSocketSet) {
+            if (msgWebsocket.getSn().equals(sn)) {
+                for (int i = 0; i < times; i++) {
+                    WebsocketMsgTask task = new WebsocketMsgTask(msgWebsocket, "m_" + (i+1) + ":" + msg);
+                    new Thread(task).start();
+                }
+            }
+        }
+
+        return "ok";
+    }
+}
+
+class WebsocketMsgTask implements Runnable {
+
+    private MSGWebsocket msgWebsocket;
+    private String msg;
+
+    public WebsocketMsgTask(MSGWebsocket msgWebsocket, String msg) {
+        this.msgWebsocket = msgWebsocket;
+        this.msg = msg;
+    }
+
+    @Override
+    public void run() {
+        try {
+            System.out.println("发送消息:" + msg);
+            msgWebsocket.sendMessage2(msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
